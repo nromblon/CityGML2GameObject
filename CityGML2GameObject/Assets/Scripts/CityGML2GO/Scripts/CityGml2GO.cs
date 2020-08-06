@@ -13,12 +13,18 @@ using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Material = UnityEngine.Material;
 
+using UnityEngine.Networking;
+
 namespace Assets.Scripts.CityGML2GO
 {
     public partial class CityGml2GO : MonoBehaviour {
         [LabelOverride("File-/Directory Name")]
-        public string Filename;
+
+		public string Filename;
         public bool StreamingAssets;
+
+		public bool ResourcesAssets;
+
         public Material DefaultMaterial;
         public GameObject Parent;
         [LabelOverride("Apply automatic or manual translation")]
@@ -48,35 +54,67 @@ namespace Assets.Scripts.CityGML2GO
             SemanticSurfMat = GetComponent<SemanticSurfaceMaterial>();
         }
 
-        /// <summary>
-        /// Check if K key is pressed, if so, run the import.
-        /// Could be any other input etc.
-        /// </summary>
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.K))
+		/// <summary>
+		/// Check if K key is pressed, if so, run the import.
+		/// Could be any other input etc.
+		/// </summary>
+		void Update() {
+
+			if (Input.GetKeyDown(KeyCode.K) || Input.GetMouseButtonDown(0))
             {
                 var fn = "";
                 if (StreamingAssets)
                 {
-                    fn = Path.Combine(Application.streamingAssetsPath, Filename);
-                }
+					fn = Path.Combine(Application.streamingAssetsPath, Filename);
+				}
                 else
                 {
                     fn = Filename;
                 }
                 Polygons = new List<GameObject>();
-                var attributes = File.GetAttributes(fn);
-                if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
-                {
-                    SetTranslate(new DirectoryInfo(fn));
-                    StartCoroutine("RunDirectory", fn);
-                }
-                else
-                {
-                    SetTranslate(new FileInfo(fn));
-                    StartCoroutine("Run", fn);
-                }
+
+
+				FileAttributes attributes;
+
+				if (Application.platform == RuntimePlatform.Android) {
+					//var unityWebRequest = UnityWebRequest.Get(fn);
+					//unityWebRequest.SendWebRequest();
+
+					//while (!unityWebRequest.isDone) {
+					//	if (unityWebRequest.isNetworkError || unityWebRequest.isHttpError) {
+					//		Debug.LogError("Web Request Error");
+					//		break;
+					//	}
+					//}
+
+					//var persistentDataPath = Path.Combine(Application.persistentDataPath ,"Berlin");
+
+					//File.WriteAllBytes(persistentDataPath,unityWebRequest.downloadHandler.data);
+
+					//attributes = File.GetAttributes(persistentDataPath);
+					
+				}
+				else {
+					attributes = File.GetAttributes(fn);
+				}
+
+				if (ResourcesAssets) {
+					var gmlFiles = Resources.LoadAll<TextAsset>(Filename);
+				}
+
+				//// Checks if File is a Single file or a directory.
+				//if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
+    //            {
+				//	Debug.Log("### - Directory detected");
+    //                SetTranslate(new DirectoryInfo(fn));
+    //                StartCoroutine("RunDirectory", fn);
+    //            }
+    //            else 
+				//{
+				//	Debug.Log("### - Single File detected");
+				//	SetTranslate(new FileInfo(fn));
+    //                StartCoroutine("Run", fn);
+    //            }
             }
         }
 
