@@ -23,8 +23,6 @@ namespace Assets.Scripts.CityGML2GO
 		public string Filename;
         public bool StreamingAssets;
 
-		public bool ResourcesAssets;
-
         public Material DefaultMaterial;
         public GameObject Parent;
         [LabelOverride("Apply automatic or manual translation")]
@@ -69,53 +67,29 @@ namespace Assets.Scripts.CityGML2GO
 				}
                 else
                 {
-                    fn = Filename;
+					// Change this to browse files
+					fn = Path.Combine(Application.persistentDataPath, Filename);
                 }
+
                 Polygons = new List<GameObject>();
 
 
 				FileAttributes attributes;
 
-				if (Application.platform == RuntimePlatform.Android) {
-					//var unityWebRequest = UnityWebRequest.Get(fn);
-					//unityWebRequest.SendWebRequest();
+				attributes = File.GetAttributes(fn);
 
-					//while (!unityWebRequest.isDone) {
-					//	if (unityWebRequest.isNetworkError || unityWebRequest.isHttpError) {
-					//		Debug.LogError("Web Request Error");
-					//		break;
-					//	}
-					//}
-
-					//var persistentDataPath = Path.Combine(Application.persistentDataPath ,"Berlin");
-
-					//File.WriteAllBytes(persistentDataPath,unityWebRequest.downloadHandler.data);
-
-					//attributes = File.GetAttributes(persistentDataPath);
-					
+				// Checks if File is a Single file or a directory.
+				if ((attributes & FileAttributes.Directory) == FileAttributes.Directory) {
+					Debug.Log("### - Directory detected");
+					SetTranslate(new DirectoryInfo(fn));
+					StartCoroutine("RunDirectory", fn);
 				}
 				else {
-					attributes = File.GetAttributes(fn);
+					Debug.Log("### - Single File detected");
+					SetTranslate(new FileInfo(fn));
+					StartCoroutine("Run", fn);
 				}
-
-				if (ResourcesAssets) {
-					var gmlFiles = Resources.LoadAll<TextAsset>(Filename);
-				}
-
-				//// Checks if File is a Single file or a directory.
-				//if ((attributes & FileAttributes.Directory) == FileAttributes.Directory)
-    //            {
-				//	Debug.Log("### - Directory detected");
-    //                SetTranslate(new DirectoryInfo(fn));
-    //                StartCoroutine("RunDirectory", fn);
-    //            }
-    //            else 
-				//{
-				//	Debug.Log("### - Single File detected");
-				//	SetTranslate(new FileInfo(fn));
-    //                StartCoroutine("Run", fn);
-    //            }
-            }
+			}
         }
 
         /// <summary>
